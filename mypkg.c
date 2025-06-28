@@ -11,7 +11,7 @@
 
 #define PKG_DB_PATH "/var/db/mypkg"
 #define PKG_CACHE_PATH "/var/cache/mypkg"
-#define PKG_REPO_URL "https://loxsete.github.io/mypcg-repo/"
+#define PKG_REPO_URL "https://loxsete.github.io/mpkg-server/"
 
 extern int is_installed(const char *package_name);
 
