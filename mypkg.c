@@ -13,6 +13,9 @@
 #define PKG_CACHE_PATH "/var/cache/mypkg"
 #define PKG_REPO_URL "https://loxsete.github.io/mypcg-repo/"
 
+extern int is_installed(const char *package_name);
+
+
 typedef struct {
     char name[256];
     char version[64]; 
@@ -106,12 +109,14 @@ Package* read_package_info(const char *archive_path) {
 
 int check_dependencies(const char *depends) {
     if (strlen(depends) == 0) return 0;
-    
+
     char deps_copy[1024];
     strncpy(deps_copy, depends, sizeof(deps_copy) - 1);
     deps_copy[sizeof(deps_copy) - 1] = '\0';
-    
+
     char *dep = strtok(deps_copy, ",");
+    int missing_deps = 0;
+
     while (dep != NULL) {
         while (*dep == ' ') dep++;
         char *end = dep + strlen(dep) - 1;
@@ -119,18 +124,26 @@ int check_dependencies(const char *depends) {
             *end = '\0';
             end--;
         }
-        
-        char cmd[512];
-        snprintf(cmd, sizeof(cmd), "xbps-query %s > /dev/null 2>&1", dep);
-        if (system(cmd) != 0) {
-            printf("Shit, dependency '%s' is missing!\n", dep);
+
+        if (!is_installed(dep)) {
+            printf("Fucking error: dependency '%s' is missing!\n", dep);
+            missing_deps++;
+        } else {
+            printf("Dependency '%s' is installed. Hell yeah.\n", dep);
         }
-        
+
         dep = strtok(NULL, ",");
     }
-    
+
+    if (missing_deps > 0) {
+        fprintf(stderr, "Shit! %d dependencies are missing. Install failed, bro.\n", missing_deps);
+        return -1;
+    }
+
     return 0;
 }
+
+
 
 int download_package(const char *package_name) {
     char url[512];
