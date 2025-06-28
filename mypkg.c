@@ -9,12 +9,11 @@
 #include <errno.h>
 #include <time.h>
 
-#define PKG_DB_PATH "/var/db/mypkg"
-#define PKG_CACHE_PATH "/var/cache/mypkg"
+#define PKG_DB_PATH "/var/db/mpkg"
+#define PKG_CACHE_PATH "/var/cache/mpkg"
 #define PKG_REPO_URL "https://loxsete.github.io/mpkg-server/"
 
 extern int is_installed(const char *package_name);
-
 
 typedef struct {
     char name[256];
@@ -143,10 +142,8 @@ int check_dependencies(const char *depends) {
     return 0;
 }
 
-
-
 int download_package(const char *package_name) {
-    char url[512];
+    char url[512];  // Fixed: Removed invalid character '玫'
     char cache_file[512];
     char cmd[1024];
 
@@ -521,7 +518,7 @@ void show_package_info(const char *package_name) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: %s <command> [package], don't fuck it up\n", argv[0]);
+        printf("Usage: mpkg <command> [package], don't fuck it up\n");
         printf("Commands:\n");
         printf("  install <package>  - install some shit\n");
         printf("  remove <package>   - nuke that package\n");

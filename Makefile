@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 LDFLAGS = -larchive
-TARGET = mypkg
+TARGET = mpkg
 SOURCES = mypkg.c
 OBJECTS = $(SOURCES:.c=.o)
 
