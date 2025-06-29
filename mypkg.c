@@ -28,13 +28,13 @@ typedef struct {
 int db_init() {
     if (mkdir(PKG_DB_PATH, 0755) == -1) {
         if (errno != EEXIST) {
-            fprintf(stderr, "Fuck, can't create db dir: %s\n", strerror(errno));
+            fprintf(stderr, "Can't create db dir: %s\n", strerror(errno));
             return -1;
         }
     }
     if (mkdir(PKG_CACHE_PATH, 0755) == -1) {
         if (errno != EEXIST) {
-            fprintf(stderr, "Shit, cache dir creation failed: %s\n", strerror(errno));
+            fprintf(stderr, "Cache dir creation failed: %s\n", strerror(errno));
             return -1;
         }
     }
@@ -58,7 +58,7 @@ Package* read_package_info(const char *archive_path) {
     archive_read_support_filter_all(a);
     
     if ((r = archive_read_open_filename(a, archive_path, 10240))) {
-        fprintf(stderr, "Damn, archive open fucked up: %s\n", archive_error_string(a));
+        fprintf(stderr, "Archive open: %s\n", archive_error_string(a));
         archive_read_free(a);
         return NULL;
     }
@@ -125,17 +125,17 @@ int check_dependencies(const char *depends) {
         }
 
         if (!is_installed(dep)) {
-            printf("Fucking error: dependency '%s' is missing!\n", dep);
+            printf("Error: dependency '%s' is missing!\n", dep);
             missing_deps++;
         } else {
-            printf("Dependency '%s' is installed. Hell yeah.\n", dep);
+            printf("Dependency '%s' is installed.\n", dep);
         }
 
         dep = strtok(NULL, ",");
     }
 
     if (missing_deps > 0) {
-        fprintf(stderr, "Shit! %d dependencies are missing. Install failed, bro.\n", missing_deps);
+        fprintf(stderr, "%d dependencies are missing. Install failed, bro.\n", missing_deps);
         return -1;
     }
 
@@ -143,7 +143,7 @@ int check_dependencies(const char *depends) {
 }
 
 int download_package(const char *package_name) {
-    char url[512];  // Fixed: Removed invalid character '玫'
+    char url[512];  
     char cache_file[512];
     char cmd[1024];
 
@@ -151,10 +151,10 @@ int download_package(const char *package_name) {
     snprintf(cache_file, sizeof(cache_file), "%s/%s.tar.xz", PKG_CACHE_PATH, package_name);
     snprintf(cmd, sizeof(cmd), "curl -L -f -o %s %s", cache_file, url);
 
-    printf("Grabbing %s, hold tight...\n", package_name);
+    printf("Grabbing %s\n", package_name);
     int result = system(cmd);
     if (result != 0) {
-        fprintf(stderr, "Fuck, download for %s went to shit\n", package_name);
+        fprintf(stderr, "Download for %s went to shit\n", package_name);
         return -1;
     }
     
@@ -175,7 +175,7 @@ static int copy_data(struct archive *ar, struct archive *aw) {
             return r;
         r = archive_write_data_block(aw, buff, size, offset);
         if (r < ARCHIVE_OK) {
-            fprintf(stderr, "Write error, what the hell: %s\n", archive_error_string(aw));
+            fprintf(stderr, "Write error: %s\n", archive_error_string(aw));
             return r;
         }
     }
@@ -199,24 +199,24 @@ int extract_package(const char *package_name) {
     archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_OWNER);
 
     if ((r = archive_read_open_filename(a, archive_path, 10240))) {
-        fprintf(stderr, "Archive open fucked up: %s\n", archive_error_string(a));
+        fprintf(stderr, "Archive open: %s\n", archive_error_string(a));
         return -1;
     }
 
-    printf("Unpacking %s, let's roll...\n", package_name);
+    printf("Unpacking %s, \n", package_name);
     char files_log_path[512];
     FILE *files_log;
     
     snprintf(files_log_path, sizeof(files_log_path), "%s/%s.files", PKG_DB_PATH, package_name);
     files_log = fopen(files_log_path, "w");
     if (!files_log) {
-        fprintf(stderr, "Can't open files log, damn it: %s\n", strerror(errno));
+        fprintf(stderr, "Can't open files log: %s\n", strerror(errno));
         return -1;
     }
 
     old_cwd = getcwd(NULL, 0);
     if (chdir("/") != 0) {
-        fprintf(stderr, "Chdir to root failed, shit: %s\n", strerror(errno));
+        fprintf(stderr, "Chdir to root failed: %s\n", strerror(errno));
         if (old_cwd) free(old_cwd);
         fclose(files_log);
         return -1;
@@ -247,7 +247,7 @@ int extract_package(const char *package_name) {
         }
 
         if ((r = archive_write_header(ext, entry)) != ARCHIVE_OK) {
-            fprintf(stderr, "Header write fucked up: %s\n", archive_error_string(ext));
+            fprintf(stderr, "Header write: %s\n", archive_error_string(ext));
         } else {
             copy_data(a, ext);
         }
@@ -275,7 +275,7 @@ int mark_installed(const char *package_name, Package *pkg) {
 
     f = fopen(db_file, "w");
     if (!f) {
-        fprintf(stderr, "Can't open db file, fuck: %s\n", strerror(errno));
+        fprintf(stderr, "Can't open db file: %s\n", strerror(errno));
         return -1;
     }
 
@@ -336,14 +336,14 @@ Package* read_installed_package(const char *package_name) {
 
 int install_package(const char *package_name) {
     if (is_installed(package_name)) {
-        printf("%s is already fucking installed, chill\n", package_name);
+        printf("%s is already installed\n", package_name);
         return 0;
     }
 
-    printf("Installing %s, let's do this shit\n", package_name);
+    printf("Installing %s\n", package_name);
 
     if (download_package(package_name) != 0) {
-        fprintf(stderr, "Download for %s fucked up\n", package_name);
+        fprintf(stderr, "Download for %s\n", package_name);
         return -1;
     }
 
@@ -352,7 +352,7 @@ int install_package(const char *package_name) {
     
     Package *pkg = read_package_info(cache_file);
     if (pkg) {
-        printf("Package details, check this shit out:\n");
+        printf("Package details:\n");
         printf("  name: %s\n", pkg->name);
         printf("  version: %s\n", pkg->version);
         printf("  arch: %s\n", pkg->arch);
@@ -367,14 +367,14 @@ int install_package(const char *package_name) {
     }
 
     if (extract_package(package_name) != 0) {
-        fprintf(stderr, "Extracting %s went to hell\n", package_name);
+        fprintf(stderr, "Extracting %s\n", package_name);
         if (pkg) free(pkg);
         return -1;
     }
 
     mark_installed(package_name, pkg);
     
-    printf("%s installed like a badass\n", package_name);
+    printf("%s installed\n", package_name);
     
     if (pkg) free(pkg);
     return 0;
@@ -385,11 +385,11 @@ int remove_package(const char *package_name) {
     char files_file[512];
 
     if (!is_installed(package_name)) {
-        printf("%s ain't installed, what the fuck?\n", package_name);
+        printf("%s ain't installed?\n", package_name);
         return 0;
     }
 
-    printf("Nuking %s, hold on...\n", package_name);
+    printf("Nuking %s\n", package_name);
 
     snprintf(files_file, sizeof(files_file), "%s/%s.files", PKG_DB_PATH, package_name);
     FILE *f = fopen(files_file, "r");
@@ -408,24 +408,24 @@ int remove_package(const char *package_name) {
             if (unlink(path) == 0) {
                 files_removed++;
             } else {
-                printf("  Couldn't delete %s, damn it: %s\n", path, strerror(errno));
+                printf("  Couldn't delete %s: %s\n", path, strerror(errno));
                 files_failed++;
             }
         }
         fclose(f);
         
-        printf("Cleanup: %d files trashed, %d fucked up\n", files_removed, files_failed);
+        printf("Cleanup: %d files trashed %d\n", files_removed, files_failed);
         
         if (unlink(files_file) != 0) {
-            printf("Warning: Couldn't delete files list, shit: %s\n", strerror(errno));
+            printf("Warning: Couldn't delete files list: %s\n", strerror(errno));
         }
     } else {
-        printf("Warning: No files list for %s, what the hell?\n", package_name);
+        printf("Warning: No files list for %s?\n", package_name);
     }
 
     snprintf(db_file, sizeof(db_file), "%s/%s.installed", PKG_DB_PATH, package_name);
     if (unlink(db_file) != 0) {
-        printf("Warning: Couldn't remove install record, fuck: %s\n", strerror(errno));
+        printf("Warning: Couldn't remove install record: %s\n", strerror(errno));
     }
 
     printf("%s is gone, baby, gone\n", package_name);
@@ -439,11 +439,11 @@ void list_installed() {
 
     dir = opendir(PKG_DB_PATH);
     if (!dir) {
-        fprintf(stderr, "Can't open dir, shit: %s\n", strerror(errno));
+        fprintf(stderr, "Can't open dir: %s\n", strerror(errno));
         return;
     }
 
-    printf("Installed packages, check this shit:\n");
+    printf("Installed packages:\n");
     while ((entry = readdir(dir)) != NULL) {
         if (strstr(entry->d_name, ".installed")) {
             char pkg_name[256];
@@ -468,13 +468,13 @@ void list_installed() {
 
 void show_package_info(const char *package_name) {
     if (!is_installed(package_name)) {
-        printf("%s ain't installed, dumbass\n", package_name);
+        printf("%s ain't installed\n", package_name);
         return;
     }
     
     Package *pkg = read_installed_package(package_name);
     if (!pkg) {
-        printf("Can't read info for %s, shit's broken\n", package_name);
+        printf("Can't read info for %s\n", package_name);
         return;
     }
     
@@ -508,7 +508,7 @@ void show_package_info(const char *package_name) {
             }
         }
         if (!feof(f)) {
-            printf("    ... and more shit\n");
+            
         }
         fclose(f);
     }
@@ -518,23 +518,23 @@ void show_package_info(const char *package_name) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Usage: mpkg <command> [package], don't fuck it up\n");
+        printf("Usage: mpkg <command> [package]\n");
         printf("Commands:\n");
-        printf("  install <package>  - install some shit\n");
-        printf("  remove <package>   - nuke that package\n");
-        printf("  list               - show installed crap\n");
-        printf("  info <package>     - get package details\n");
+        printf("  install <package>  - install package\n");
+        printf("  remove <package>   - remove package\n");
+        printf("  list               - list installed packages\n");
+        printf("  info <package>     - show package info\n");
         return 1;
     }
 
     if (db_init() != 0) {
-        fprintf(stderr, "Database init fucked up\n");
+        fprintf(stderr, "Failed to initialize database\n");
         return 1;
     }
 
     if (strcmp(argv[1], "install") == 0) {
         if (argc < 3) {
-            fprintf(stderr, "Gimme a package name to install, asshole\n");
+            fprintf(stderr, "Please specify a package name to install\n");
             return 1;
         }
         return install_package(argv[2]);
@@ -542,7 +542,7 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(argv[1], "remove") == 0) {
         if (argc < 3) {
-            fprintf(stderr, "Tell me what package to nuke, dipshit\n");
+            fprintf(stderr, "Please specify a package name to remove\n");
             return 1;
         }
         return remove_package(argv[2]);
@@ -555,13 +555,13 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(argv[1], "info") == 0) {
         if (argc < 3) {
-            fprintf(stderr, "Need a package name for info, genius\n");
+            fprintf(stderr, "Please specify a package name to show info\n");
             return 1;
         }
         show_package_info(argv[2]);
         return 0;
     }
 
-    fprintf(stderr, "Unknown command: %s, what the fuck?\n", argv[1]);
+    fprintf(stderr, "Unknown command: %s\n", argv[1]);
     return 1;
 }
