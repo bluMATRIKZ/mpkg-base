@@ -9,9 +9,10 @@
 #include <errno.h>
 #include <time.h>
 
-#define PKG_DB_PATH "/var/db/mpkg"
-#define PKG_CACHE_PATH "/var/cache/mpkg"
-#define PKG_REPO_URL "https://loxsete.github.io/mpkg-server/"
+#define CONFIG_FILE "/etc/mpkg.conf"
+char PKG_DB_PATH[256] = "/var/db/mpkg";
+char PKG_CACHE_PATH[256] = "/var/cache/mpkg";
+char PKG_REPO_URL[512] = "https://loxsete.github.io/mpkg-server/";
 
 extern int is_installed(const char *package_name);
 
@@ -25,7 +26,50 @@ typedef struct {
     time_t install_time;
 } Package;
 
+int read_config() {
+    FILE *f = fopen(CONFIG_FILE, "r");
+    if (!f) {
+        fprintf(stderr, "Can't open config file: %s, using defaults\n", strerror(errno));
+        return 0;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), f)) {
+        line[strcspn(line, "\n")] = 0;
+        if (line[0] == '#' || line[0] == '\0') continue;
+
+        char *key = strtok(line, "=");
+        char *value = strtok(NULL, "=");
+        if (!key || !value) continue;
+
+        while (*key == ' ') key++;
+        while (*value == ' ') value++;
+
+        char *end = value + strlen(value) - 1;
+        while (end > value && *end == ' ') *end-- = '\0';
+
+        if (strcmp(key, "PKG_DB_PATH") == 0) {
+            strncpy(PKG_DB_PATH, value, sizeof(PKG_DB_PATH) - 1);
+            PKG_DB_PATH[sizeof(PKG_DB_PATH) - 1] = '\0';
+        } else if (strcmp(key, "PKG_CACHE_PATH") == 0) {
+            strncpy(PKG_CACHE_PATH, value, sizeof(PKG_CACHE_PATH) - 1);
+            PKG_CACHE_PATH[sizeof(PKG_CACHE_PATH) - 1] = '\0';
+        } else if (strcmp(key, "PKG_REPO_URL") == 0) {
+            strncpy(PKG_REPO_URL, value, sizeof(PKG_REPO_URL) - 1);
+            PKG_REPO_URL[sizeof(PKG_REPO_URL) - 1] = '\0';
+        }
+    }
+
+    fclose(f);
+    return 0;
+}
+
 int db_init() {
+    if (read_config() != 0) {
+        fprintf(stderr, "Failed to read config\n");
+        return -1;
+    }
+
     if (mkdir(PKG_DB_PATH, 0755) == -1) {
         if (errno != EEXIST) {
             fprintf(stderr, "Can't create db dir: %s\n", strerror(errno));
