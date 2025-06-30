@@ -1,48 +1,37 @@
-# mypkg — a rude-ass package manager for maniacs
-
-mypkg is a dirty, no-bullshit, minimalistic package manager written in C, for those who like it raw, fast, and with a pinch of profanity.
+# mypkg — a minimal package manager
 
 ## Features
-
-- Installs .tar.xz packages from a remote repo (https://loxsete.github.io/mypcg-repo/)
-- Dependency checking with aggressive output
-- Keeps a record of installed packages
-- Removes packages and all their crap
-- Logs installed files
-- No systemd, no nonsense
+- Installs .tar.xz packages from a remote repository (https://loxsete.github.io/mpkg-server)
+- Checks dependencies
+- Tracks installed packages
+- Config system
 
 ## Requirements
-
 - Linux
-- libarchive (install via package manager)
+- libarchive
 
 ## Build
-``` bash
-make
-```
-## Usage
-``` bash
-cd /
-mypkg install <package>   # install some shit
-mypkg remove <package>    # nuke that package
-mypkg list                # show installed crap
-mypkg info <package>      # get package details
-```
-## Install paths
-/var/db/mypkg — install db
-/var/cache/mypkg — downloaded archives
-/.usr/local/bin/mypkg — the binary
-## PKGINFO example
-``` bash
-name=neovim
-version=0.9.5
-arch=x86_64
-description=Kick-ass text editor for hackers
-depends=libtermkey,libvterm
-size=1536000
-```
-## Disclaimer
-**This thing is raw and stupid. It doesn’t check signatures, it may break stuff, and it sure as hell isn’t secure. Don’t cry if it eats your system.*
+``make``
 
-## License
-**WTFPL / Public Domain. Do whatever you want.**
+## Usage
+
+- `cd /`
+- `mypkg install <package>`
+- `mypkg remove <package>`
+- `mypkg list`               
+- `mypkg info <package>`
+
+## Config
+Configure settings in **/etc/mpkg.conf** with these parameters:
+
+**PKG_DB_PATH** -    Package database directory
+
+**PKG_CACHE_PATH** - Package cache directory
+
+**PKG_REPO_URL** -   Package repository URL
+## Example config
+```
+PKG_DB_PATH=/var/db/mpkg
+PKG_CACHE_PATH=/var/cache/mpkg
+PKG_REPO_URL=https://loxsete.github.io/mpkg-server/
+```
