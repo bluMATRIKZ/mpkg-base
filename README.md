@@ -25,11 +25,12 @@ make
 ## Config
 Configure settings in **/etc/mpkg.conf** with these parameters:
 
-**PKG_DB_PATH** -    Package database directory
+**`PKG_DB_PATH`** -    Package database directory
 
-**PKG_CACHE_PATH** - Package cache directory
+**`PKG_CACHE_PATH`** - Package cache directory
 
-**PKG_REPO_URL** -   Package repository URL
+**`PKG_REPO_URL`** -   Package repository URL
+
 ## Example config
 ```
 PKG_DB_PATH=/var/db/mpkg
