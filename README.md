@@ -1,7 +1,7 @@
 # mypkg — a minimal package manager for Linux
 
 ## Features
-- Installs .tar.xz packages from a remote repository (https://loxsete.github.io/mpkg-server)
+- Installs .tar.xz packages from a remote repository (eg, https://loxsete.github.io/mpkg-server)
 - Checks dependencies
 - Tracks installed packages
 - Config system
