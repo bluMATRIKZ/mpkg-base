@@ -7,7 +7,6 @@
 - Config system
 
 ## Requirements
-- Linux
 - libarchive
 
 ## Build
