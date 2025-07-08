@@ -1,4 +1,4 @@
-# mypkg — a minimal package manager
+# mypkg — a minimal package manager for Linux
 
 ## Features
 - Installs .tar.xz packages from a remote repository (https://loxsete.github.io/mpkg-server)
