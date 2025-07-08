@@ -1,7 +1,7 @@
 # mypkg — a minimal package manager
 
 ## Features
-- Installs .tar.xz packages from a remote repository (https://loxsete.github.io/mpkg-server)
+- Installs .tar.xz packages from a remote repository (eg, https://loxsete.github.io/mpkg-server)
 - Checks dependencies
 - Tracks installed packages
 - Config system
@@ -11,10 +11,9 @@
 - libarchive
 
 ## Build
-``make``
+```make```
 
 ## Usage
-
 - `cd /`
 - `mypkg install <package>`
 - `mypkg remove <package>`
@@ -29,6 +28,7 @@ Configure settings in **/etc/mpkg.conf** with these parameters:
 **PKG_CACHE_PATH** - Package cache directory
 
 **PKG_REPO_URL** -   Package repository URL
+
 ## Example config
 ```
 PKG_DB_PATH=/var/db/mpkg
