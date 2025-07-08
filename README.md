@@ -11,7 +11,9 @@
 - libarchive
 
 ## Build
-```make```
+```
+make
+```
 
 ## Usage
 
